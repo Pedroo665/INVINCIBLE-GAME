@@ -1,1 +1,1 @@
-# INVINCIBLE-GAME jjj
+# INVINCIBLE-GAME=(red)
