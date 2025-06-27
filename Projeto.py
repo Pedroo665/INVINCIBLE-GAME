@@ -4,13 +4,13 @@ class Jogador(object):
     def __init__(self):
         
         self.sprite=pygame.image.load("data\ps1.png")
-        
-        self.x=340
-        self.y=340
+        self.rect=self.sprite.get_rect()
+        self.rect.x=340
+        self.rect.y=340
   
 
     def draw(self, surface):
-       surface.blit(self.sprite, (self.x, self.y))
+       surface.blit(self.sprite, (self.rect.x, self.rect.y))
 
     def move(self, dx, dy):
         
@@ -23,10 +23,64 @@ class Jogador(object):
     def move_single_axis(self, dx, dy):
      
         
-        self.x += dx
-        self.y += dy
-
+        self.rect.x += dx
+        self.rect.y += dy
+        # verifica se o sprite do jogador colidiu com um bloco do labirinto 
+        for wall in walls:
+            if self.rect.colliderect(wall.rect):
+                if dx > 0: 
+                    self.rect.right = wall.rect.left
+                if dx < 0: 
+                    self.rect.left = wall.rect.right
+                if dy > 0: 
+                    self.rect.bottom = wall.rect.top
+                if dy < 0: 
+                    self.rect.top = wall.rect.bottom
+                if dy < 0:
+                   self.rect.top = wall.rect.bottom
        
+class Inimigo(object):
+    
+    def __init__(self):
+        
+        self.sprite=pygame.image.load("data\ene.png")
+        self.rect=self.sprite.get_rect()
+        self.rect.x=540
+        self.rect.y=390
+  
+
+    def draw(self, surface):
+       surface.blit(self.sprite, (self.rect.x, self.rect.y))
+
+    def move(self, dx, dy):
+        
+        
+        if dx != 0:
+            self.move_single_axis(dx, 0)
+        if dy != 0:
+            self.move_single_axis(0, dy)
+            
+    
+       
+    
+
+    def Update(self):
+     
+
+        if  jogador.rect.x > self.rect.x :
+            self.rect.x += 1
+        if jogador.rect.x < self.rect.x :
+            self.rect.x -= 1
+        if jogador.rect.y > self.rect.y :
+            self.rect.y += 1
+        if jogador.rect.y < self.rect.y :
+            self.rect.y -= 1
+
+    
+
+    
+        
+
        
 class Wall(object):
     
@@ -42,8 +96,11 @@ pygame.init()
 tela=pygame.display.set_mode((1920,1080))
 icon=pygame.image.load('data\MARK.jpg')
 pygame.display.set_icon(icon)
+pygame.display.set_caption("INVINCIBLE")
 
-
+font = pygame.font.SysFont(None, 100)
+text = ""
+input_active = True
 x=627
 y=900
 ativo=False
@@ -88,7 +145,18 @@ level1 = [
 ]
 
 
+def textinho(texto,x,y,tamanho):
+    
+    
+ 
+    font=pygame.font.Font('freesansbold.ttf', tamanho)
+    text = font.render(texto, True, "black")
+   
 
+    textRect = text.get_rect()
+
+    textRect.center = (x,y)
+    tela.blit(text, textRect)
 def Menu ():
 
 #menu=pygame.image.load ('menu.jpg')
@@ -110,12 +178,13 @@ def st1(level,):
     y +=30 
     x = 0
 
-st1(level1)
+st1(level1) #aqui a gente ta chamando a função para construir o labirinto e alimentando (passando como argumento) com o desenho do nivel 1
 
 gamestate="menu" #essa variavel vai verificar qual tela foi selecionada
-nivel=False
+
 rodar=True
 jogador=Jogador()
+inimigo=Inimigo()
 rodar=True
 
 
@@ -130,7 +199,8 @@ while rodar:
     
         if gamestate=="menu":
              tela.fill('red')
-             jogador=Jogador()
+             jogador=Jogador() #toda vez que o voltar a tela principal, o jogador vai ser resetado para a posição inicial
+             inimigo=Inimigo()
              Menu()
              ponteiro=menu=pygame.image.load ('data\psMenu.png')
              tela.blit(ponteiro,(x,y))
@@ -153,11 +223,10 @@ while rodar:
                     x=100
                     y=900
                     
-                   #comando para selecionar a opção jogo
+                   #comando para selecionar a opção jogo (se x for igual a 627 e a tecla que for pressionada for space, então gamestate será igual a nivel 
              if x==627 and controle.type == pygame.KEYDOWN and controle.key == pygame.K_SPACE:
                    gamestate="nivel"
-                   nivel=True
-
+                   
                    #comando para selecionar a opção crédito
              if x==1170 and controle.type == pygame.KEYDOWN and controle.key == pygame.K_SPACE:
                    gamestate="creditos"
@@ -165,6 +234,7 @@ while rodar:
                    #comando para selecionar a opção configuração
              if x==100 and controle.type == pygame.KEYDOWN and controle.key == pygame.K_SPACE:
                    gamestate="configuração"
+                   
              pygame.display.flip()
 
              #comando para voltar para o menu principal
@@ -179,8 +249,20 @@ while rodar:
             for wall1 in walls:
                  pygame.draw.rect(tela, ("blue"), wall1.rect)
             jogador.draw(tela)
+            inimigo.draw(tela)
             ativo=True
-
+            inimigo.Update()
+            
+        if jogador.rect.colliderect(inimigo.rect):
+            gamestate="gameover"
+            
+        if gamestate=="gameover":
+            tela.fill('pink')
+            textinho("GAME OVER",(1920//2),(1080//2),48)
+            
+            if controle.type == pygame.KEYDOWN and controle.key == pygame.K_BACKSPACE:
+                  gamestate="menu"
+                  ativo=False
         # se o jogo tiver rodando(se ativo for verdadeiro),a movimentação do personagem será permitida com os comandos configurados    
         if ativo:
             
@@ -197,6 +279,19 @@ while rodar:
             tela.fill('blue')
         if gamestate=="configuração":
             tela.fill('yellow')
+            
+            if controle.type == pygame.KEYDOWN and controle.type == pygame.K_SPACE :
+               input_active = True
+               text = ""
+            if controle.type == pygame.KEYDOWN and input_active:
+               if controle.key == pygame.K_RETURN:
+                input_active = False
+               elif controle.key == pygame.K_p:
+                text =  text[:-1]
+               else:
+                text += controle.unicode
+            text_surf = font.render(text, True, (255, 0, 0))
+            tela.blit(text_surf, text_surf.get_rect(center = tela.get_rect().center))
                  
         pygame.display.update()
 
