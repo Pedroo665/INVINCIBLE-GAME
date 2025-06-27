@@ -34,9 +34,16 @@ class Wall(object):
         walls.append(self)
         self.rect = pygame.Rect(pos[0], pos[1], 30, 30)
 
+
+
 pygame.init()
+
+
 tela=pygame.display.set_mode((1920,1080))
 icon=pygame.image.load('data\MARK.jpg')
+pygame.display.set_icon(icon)
+
+
 x=627
 y=900
 ativo=False
@@ -79,7 +86,9 @@ level1 = [
 "W                                                                            W",
 "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"
 ]
-pygame.display.set_icon(icon)
+
+
+
 def Menu ():
 
 #menu=pygame.image.load ('menu.jpg')
@@ -87,6 +96,7 @@ def Menu ():
  tela.fill('red') 
 
  pygame.display.update()
+ 
 def st1(level,):
  tela.fill((0,0,0))
  x = y = 0
@@ -101,11 +111,15 @@ def st1(level,):
     x = 0
 
 st1(level1)
-gamestate="menu"
+
+gamestate="menu" #essa variavel vai verificar qual tela foi selecionada
 nivel=False
 rodar=True
 jogador=Jogador()
 rodar=True
+
+
+
 while rodar:
     
     for controle in pygame.event.get():
@@ -115,9 +129,12 @@ while rodar:
             rodar=False
     
         if gamestate=="menu":
+             tela.fill('red')
+             jogador=Jogador()
              Menu()
              ponteiro=menu=pygame.image.load ('data\psMenu.png')
              tela.blit(ponteiro,(x,y))
+             
              if controle.type == pygame.KEYDOWN and controle.key == pygame.K_RIGHT :
                 
                 if x==100:
@@ -126,6 +143,7 @@ while rodar:
                 elif x==627:
                     x=1170
                     y=900
+                    
              if controle.type == pygame.KEYDOWN and controle.key == pygame.K_LEFT :
                 
                 if x==1170:
@@ -134,23 +152,38 @@ while rodar:
                 elif x==627:
                     x=100
                     y=900
+                    
+                   #comando para selecionar a opção jogo
              if x==627 and controle.type == pygame.KEYDOWN and controle.key == pygame.K_SPACE:
                    gamestate="nivel"
-                   
                    nivel=True
+
+                   #comando para selecionar a opção crédito
+             if x==1170 and controle.type == pygame.KEYDOWN and controle.key == pygame.K_SPACE:
+                   gamestate="creditos"
+
+                   #comando para selecionar a opção configuração
+             if x==100 and controle.type == pygame.KEYDOWN and controle.key == pygame.K_SPACE:
+                   gamestate="configuração"
              pygame.display.flip()
 
+             #comando para voltar para o menu principal
+        if controle.type == pygame.KEYDOWN and controle.key == pygame.K_BACKSPACE:
+                  gamestate="menu"
+                  ativo=False
+
+            # controi o nivel se o gamestate for nivel       
         if gamestate=="nivel":
             tela.fill('black')
+            
             for wall1 in walls:
                  pygame.draw.rect(tela, ("blue"), wall1.rect)
             jogador.draw(tela)
             ativo=True
+
+        # se o jogo tiver rodando(se ativo for verdadeiro),a movimentação do personagem será permitida com os comandos configurados    
+        if ativo:
             
-        if ativo:  
-           
-        
-         
           key = pygame.key.get_pressed()
           if key[pygame.K_LEFT]:
             jogador.move((-4), 0)
@@ -160,6 +193,10 @@ while rodar:
             jogador.move(0, -4)
           if key[pygame.K_DOWN]:
             jogador.move(0, 4)
+        if gamestate=="creditos":
+            tela.fill('blue')
+        if gamestate=="configuração":
+            tela.fill('yellow')
                  
         pygame.display.update()
 
@@ -167,10 +204,6 @@ while rodar:
                  
 
 pygame.quit()
-
-
-
-
 
 
 
