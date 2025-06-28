@@ -25,6 +25,7 @@ class Jogador(object):
         
         self.rect.x += dx
         self.rect.y += dy
+        
         # verifica se o sprite do jogador colidiu com um bloco do labirinto 
         for wall in walls:
             if self.rect.colliderect(wall.rect):
@@ -245,24 +246,55 @@ while rodar:
             # controi o nivel se o gamestate for nivel       
         if gamestate=="nivel":
             tela.fill('black')
-            
+
+            #exibe os blocos do nivel na tela
             for wall1 in walls:
                  pygame.draw.rect(tela, ("blue"), wall1.rect)
+
+            #exibi o sprite do jogador e inimna tela     
             jogador.draw(tela)
             inimigo.draw(tela)
             ativo=True
-            inimigo.Update()
+            inimigo.Update() # atualiza os movimentos do inimigo
             
+        # se o sprite do jogador e do inimigo colidir vai ativar a tela de game over    
         if jogador.rect.colliderect(inimigo.rect):
             gamestate="gameover"
             
         if gamestate=="gameover":
+            
             tela.fill('pink')
             textinho("GAME OVER",(1920//2),(1080//2),48)
+           
+            if controle.type == pygame.KEYDOWN and controle.key == pygame.K_SPACE:
+                  gamestate="pontuação"
+                  ativo=False
             
             if controle.type == pygame.KEYDOWN and controle.key == pygame.K_BACKSPACE:
                   gamestate="menu"
                   ativo=False
+
+
+            # O jogador pode escrever seu nome na tela de pontuação     
+        if gamestate=="pontuação":
+            jogador=Jogador()
+            tela.fill('orange')
+            textinho("Pontuação",(1920//2),(1080//2.5),48)
+            if controle.type == pygame.KEYDOWN and controle.type == pygame.K_SPACE :
+               
+               input_active = True
+               text = " " # a variavel text é declada vazia
+               
+            if controle.type ==pygame.KEYDOWN and input_active:
+               if controle.key == pygame.K_RETURN:#esse comando confirma o nome RETURN é o mesmo que a tecla ENTER)
+                input_active = False
+               elif controle.key == pygame.K_DELETE:# esse comando permite apagar as letras
+                text =  text[:-1]
+               else:
+                text += controle.unicode#esse comando grava as letras dentro da variavel text
+            text_surf = font.render(text, True, (255, 0, 0)) # define a fonte, o texto, e a cor
+            tela.blit(text_surf, text_surf.get_rect(center = tela.get_rect().center))# exibe na tela
+            
         # se o jogo tiver rodando(se ativo for verdadeiro),a movimentação do personagem será permitida com os comandos configurados    
         if ativo:
             
@@ -280,18 +312,7 @@ while rodar:
         if gamestate=="configuração":
             tela.fill('yellow')
             
-            if controle.type == pygame.KEYDOWN and controle.type == pygame.K_SPACE :
-               input_active = True
-               text = ""
-            if controle.type == pygame.KEYDOWN and input_active:
-               if controle.key == pygame.K_RETURN:
-                input_active = False
-               elif controle.key == pygame.K_p:
-                text =  text[:-1]
-               else:
-                text += controle.unicode
-            text_surf = font.render(text, True, (255, 0, 0))
-            tela.blit(text_surf, text_surf.get_rect(center = tela.get_rect().center))
+            
                  
         pygame.display.update()
 
