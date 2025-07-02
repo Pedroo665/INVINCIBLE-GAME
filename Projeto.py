@@ -1,4 +1,5 @@
 import pygame
+
 class Jogador(object):
     
     def __init__(self):
@@ -42,31 +43,22 @@ class Jogador(object):
        
 class Inimigo(object):
     
-    def __init__(self):
-        
-        self.sprite=pygame.image.load("data\ene.png")
+    def __init__(self,image=[],ix=430,iy=390):
+        x=0
+        self.sprite=pygame.image.load(imagem[x])
         self.rect=self.sprite.get_rect()
-        self.rect.x=540
-        self.rect.y=390
+        self.rect.y=iy
+        self.rect.x=ix
   
 
     def draw(self, surface):
        surface.blit(self.sprite, (self.rect.x, self.rect.y))
-
-    def move(self, dx, dy):
         
-        
-        if dx != 0:
-            self.move_single_axis(dx, 0)
-        if dy != 0:
-            self.move_single_axis(0, dy)
-            
-    
        
     
 
     def Update(self):
-     
+          
 
         if  jogador.rect.x > self.rect.x :
             self.rect.x += 1
@@ -77,9 +69,7 @@ class Inimigo(object):
         if jogador.rect.y < self.rect.y :
             self.rect.y -= 1
 
-    
-
-    
+            
         
 
        
@@ -99,7 +89,37 @@ icon=pygame.image.load('data\MARK.jpg')
 pygame.display.set_icon(icon)
 pygame.display.set_caption("INVINCIBLE")
 
+#comandos para configurar musica
+'''musica = pygame.mixer.Sound("data/musica.mp3")
+musica.set_volume(0.40)
+musica.play(-1, 0, 1000)
+musica.stop()'''
+
+
+imagem=["data\ene.png","data\ene2.png"]
+
+saida= pygame.Rect(700, 700, 30, 30)
+
+timer_interval =1000 #500 # 0.5 seconds
+timer_event = pygame.USEREVENT + 1
+pygame.time.set_timer(timer_event , timer_interval)
+clock = pygame.time.Clock()
+
+aviso="esperando"
+
+counter =5
+counter2=15
+counter3=90
+
+
+
 font = pygame.font.SysFont(None, 100)
+
+
+texter = font.render(str(counter), True, (0, 128, 0))
+texter2 = font.render(str(counter2), True, (0, 128, 0))
+texter3 = font.render(str(counter3), True, (0, 128, 0))
+
 text = ""
 input_active = True
 x=627
@@ -185,7 +205,8 @@ gamestate="menu" #essa variavel vai verificar qual tela foi selecionada
 
 rodar=True
 jogador=Jogador()
-inimigo=Inimigo()
+inimigo=Inimigo(imagem[0])
+inimigo2=Inimigo(imagem[1],700,500)
 rodar=True
 
 
@@ -201,7 +222,8 @@ while rodar:
         if gamestate=="menu":
              tela.fill('red')
              jogador=Jogador() #toda vez que o voltar a tela principal, o jogador vai ser resetado para a posição inicial
-             inimigo=Inimigo()
+             inimigo=Inimigo(imagem[0])
+             inimigo2=Inimigo(imagem[1],700,500)
              Menu()
              ponteiro=menu=pygame.image.load ('data\psMenu.png')
              tela.blit(ponteiro,(x,y))
@@ -246,6 +268,7 @@ while rodar:
             # controi o nivel se o gamestate for nivel       
         if gamestate=="nivel":
             tela.fill('black')
+            aviso="começou"
 
             #exibe os blocos do nivel na tela
             for wall1 in walls:
@@ -254,13 +277,29 @@ while rodar:
             #exibi o sprite do jogador e inimna tela     
             jogador.draw(tela)
             inimigo.draw(tela)
+            inimigo2.draw(tela)
             ativo=True
-            inimigo.Update() # atualiza os movimentos do inimigo
+            inimigo.Update()
+            inimigo2.Update()# atualiza os movimentos do inimigo
+            pygame.draw.rect(tela, ("red"), saida)
+        if jogador.rect.colliderect(saida):
+            gamestate="ganhou"
+        if gamestate=="ganhou":
             
+            tela.fill('yellow')
+            textinho("VOCÊ GANHOU!",(1920//2),(1080//2),48)
+           
+            if controle.type == pygame.KEYDOWN and controle.key == pygame.K_SPACE:
+                  gamestate="pontuação"
+                  ativo=False
+            
+            if controle.type == pygame.KEYDOWN and controle.key == pygame.K_BACKSPACE:
+                  gamestate="menu"
+                  ativo=False   
         # se o sprite do jogador e do inimigo colidir vai ativar a tela de game over    
         if jogador.rect.colliderect(inimigo.rect):
             gamestate="gameover"
-            
+           
         if gamestate=="gameover":
             
             tela.fill('pink')
@@ -294,7 +333,50 @@ while rodar:
                 text += controle.unicode#esse comando grava as letras dentro da variavel text
             text_surf = font.render(text, True, (255, 0, 0)) # define a fonte, o texto, e a cor
             tela.blit(text_surf, text_surf.get_rect(center = tela.get_rect().center))# exibe na tela
+
             
+        if controle.type == timer_event:
+            if aviso == "começou":
+                counter -= 1
+                texter = font.render(str(counter), True, (0, 128, 0))
+                if counter == 0:
+                  aviso="esperando"
+                  
+                  
+            if aviso == "pegou":
+                   counter2 -= 1
+                   texter2 = font.render(str(counter2), True, (0, 128, 0))
+                   if counter2 == 0:
+                    aviso="esperando"
+                   
+                       
+            if ativo==True:
+                counter3 -= 1
+                texter3 = font.render(str(counter3), True, (0, 128, 0))
+                if counter3 < 0:
+                    counter3=0
+                    if counter3==0:
+                     gamestate="gameover"  
+                     active=False
+        if aviso=="pegou":
+                      
+                   texterRect_tx2= texter2.get_rect()
+                   texterRect_tx2.center = ((1920//2),(1080//2))
+                   
+                   if counter2>0:
+                    tela.blit(texter2, texterRect_tx2)
+                    
+                   
+                   
+        if aviso=="começou":
+                  
+                   textRectt = texter.get_rect()
+                   textRectt.center = ((1920//2),(1080//2))
+                   
+                   if counter>0:
+                    tela.blit(texter, textRectt)
+                    
+                   
         # se o jogo tiver rodando(se ativo for verdadeiro),a movimentação do personagem será permitida com os comandos configurados    
         if ativo:
             
@@ -307,19 +389,24 @@ while rodar:
             jogador.move(0, -4)
           if key[pygame.K_DOWN]:
             jogador.move(0, 4)
+
+            
         if gamestate=="creditos":
             tela.fill('blue')
+
+            
         if gamestate=="configuração":
             tela.fill('yellow')
             
             
-                 
+        clock.tick(60)/1000         
         pygame.display.update()
 
         
                  
 
 pygame.quit()
+
 
 
 
