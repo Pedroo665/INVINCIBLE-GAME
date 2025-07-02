@@ -1,3 +1,4 @@
+
 import pygame
 
 class Jogador(object):
@@ -179,10 +180,10 @@ def textinho(texto,x,y,tamanho):
     textRect.center = (x,y)
     tela.blit(text, textRect)
 def Menu ():
-
-#menu=pygame.image.load ('menu.jpg')
-#tela.blit(menu,(0,0))
- tela.fill('red') 
+ tela.fill('red')
+ menu=pygame.image.load ('data/menu.jpg')
+ tela.blit(menu,(0,0))
+ 
 
  pygame.display.update()
  
@@ -407,8 +408,3 @@ while rodar:
                  
 
 pygame.quit()
-
-
-
-
-
