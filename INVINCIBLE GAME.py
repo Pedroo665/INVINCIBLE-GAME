@@ -1,4 +1,3 @@
-
 import pygame
 
 class Jogador(object):
@@ -165,8 +164,10 @@ level1 = [
 "W                                                                            W",
 "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"
 ]
-
-
+powerup='data/powerUp.png'
+def item (imagem, x,y):
+    image=pygame.image.load(imagem)
+    tela.blit(image, (x,y))
 def textinho(texto,x,y,tamanho):
     
     
@@ -179,11 +180,12 @@ def textinho(texto,x,y,tamanho):
 
     textRect.center = (x,y)
     tela.blit(text, textRect)
+
 def Menu ():
  tela.fill('red')
  menu=pygame.image.load ('data/menu.jpg')
  tela.blit(menu,(0,0))
- 
+  
 
  pygame.display.update()
  
@@ -401,6 +403,7 @@ while rodar:
             inimigo.Update()
             inimigo2.Update()# atualiza os movimentos do inimigo
             pygame.draw.rect(tela, ("red"), saida)
+            item(powerup, 700,700)
     clock.tick(60)/1000         
     pygame.display.update()
 
@@ -408,3 +411,8 @@ while rodar:
                  
 
 pygame.quit()
+
+
+
+
+
