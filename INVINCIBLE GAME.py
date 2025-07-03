@@ -43,9 +43,9 @@ class Jogador(object):
        
 class Inimigo(object):
     
-    def __init__(self,image=[],ix=900,iy=390):
-        x=0
-        self.sprite=pygame.image.load(imagem[x])
+    def __init__(self,image,ix=900,iy=390):
+        
+        self.sprite=pygame.image.load(image)
         self.rect=self.sprite.get_rect()
         self.rect.y=iy
         self.rect.x=ix
@@ -68,9 +68,10 @@ class Inimigo(object):
             self.rect.y += 1
         if jogador.rect.y < self.rect.y :
             self.rect.y -= 1
+       
 
             
-        
+      
 
        
 class Wall(object):
@@ -78,7 +79,16 @@ class Wall(object):
      def __init__(self, pos):
         walls.append(self)
         self.rect = pygame.Rect(pos[0], pos[1], 30, 30)
-
+class Item (object):
+    def __init__(self,xim,yim,imagem):
+    
+        self.sprite=pygame.image.load(imagem)
+        self.rect=self.sprite.get_rect()
+        self.rect.y=yim
+        self.rect.x=xim
+    def draw(self, surface):
+       surface.blit(self.sprite, (self.rect.x, self.rect.y))
+        
 
 
 pygame.init()
@@ -96,17 +106,19 @@ musica.play(-1, 0, 1000)
 musica.stop()'''
 
 
-imagem=["data\ene.png","data\ene2.png"]
+thragg="data\Thragg.png"
+sinistro='data\Sinistro.png'
+conquest="data\Conquest.png"
 
-saida= pygame.Rect(700, 700, 30, 30)
+saida= pygame.Rect(1920//2, 1080//2, 30, 30)
 
 timer_interval =1000 #500 # 0.5 seconds
 timer_event = pygame.USEREVENT + 1
 pygame.time.set_timer(timer_event , timer_interval)
 clock = pygame.time.Clock()
-
+velocidade=4
 aviso="esperando"
-
+itemvisivel=False
 counter =5
 counter2=15
 counter3=90
@@ -163,16 +175,16 @@ level1 = [
 "W                                                              W",
 "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"
 ]
-powerup='data/powerUp.png'
-def item (imagem, x,y):
-    image=pygame.image.load(imagem)
-    tela.blit(image, (x,y))
+
+powerup='data/powerUp .png'
+
+
 def textinho(texto,x,y,tamanho):
     
     
  
     font=pygame.font.Font('freesansbold.ttf', tamanho)
-    text = font.render(texto, True, "black")
+    text = font.render(texto, True, "yellow")
    
 
     textRect = text.get_rect()
@@ -207,8 +219,10 @@ gamestate="menu" #essa variavel vai verificar qual tela foi selecionada
 
 rodar=True
 jogador=Jogador()
-inimigo=Inimigo(imagem[0])
-inimigo2=Inimigo(imagem[1],700,500)
+inimigo=Inimigo(thragg)
+inimigo2=Inimigo(sinistro,700,500)
+inimigo3=Inimigo(conquest,900,700)
+item=Item(1920//1.8,150,powerup)
 rodar=True
 
 
@@ -224,8 +238,11 @@ while rodar:
         if gamestate=="menu":
              tela.fill('red')
              jogador=Jogador() #toda vez que o voltar a tela principal, o jogador vai ser resetado para a posição inicial
-             inimigo=Inimigo(imagem[0])
-             inimigo2=Inimigo(imagem[1],700,500)
+             inimigo=Inimigo(thragg)
+             inimigo2=Inimigo(sinistro,700,500)
+             inimigo3=Inimigo(conquest,900,700)
+             item=Item(1920//1.8,150,powerup)
+             itemvisivel=False
              Menu()
              ponteiro=menu=pygame.image.load ('data\psMenu.png')
              tela.blit(ponteiro,(x,y))
@@ -273,21 +290,32 @@ while rodar:
             gamestate="ganhou"
         if gamestate=="ganhou":
             
-            tela.fill('yellow')
+            tela.fill('black')
             textinho("VOCÊ GANHOU!",(1920//2),(1080//2),48)
+            itemvisivel=False
            
             if controle.type == pygame.KEYDOWN and controle.key == pygame.K_SPACE:
-                  gamestate="pontuação"
+                  gamestate="creditos"
                   ativo=False
             
             if controle.type == pygame.KEYDOWN and controle.key == pygame.K_BACKSPACE:
                   gamestate="menu"
                   ativo=False   
         # se o sprite do jogador e do inimigo colidir vai ativar a tela de game over    
-        if jogador.rect.colliderect(inimigo.rect):
+        if jogador.rect.colliderect(inimigo.rect)or jogador.rect.colliderect(inimigo2.rect)or jogador.rect.colliderect(inimigo3.rect):
             gamestate="gameover"
-           
+        if inimigo.rect.colliderect(inimigo2.rect)or inimigo.rect.colliderect(inimigo3.rect):
+             inimigo.rect.x+=60
+             inimigo.rect.y+=60
+        if inimigo2.rect.colliderect(inimigo.rect)or inimigo2.rect.colliderect(inimigo3.rect):
+             inimigo2.rect.x+=60
+             inimigo2.rect.y+=60
+        if inimigo3.rect.colliderect(inimigo.rect)or inimigo3.rect.colliderect(inimigo2.rect):
+             inimigo3.rect.x+=60
+             inimigo3.rect.y+=60
+        
         if gamestate=="gameover":
+            itemvisivel=False
             
             tela.fill('pink')
             textinho("GAME OVER",(1920//2),(1080//2),48)
@@ -367,29 +395,34 @@ while rodar:
         # se o jogo tiver rodando(se ativo for verdadeiro),a movimentação do personagem será permitida com os comandos configurados    
        
 
-            
+        if jogador.rect.colliderect(item.rect):
+               velocidade=6
+               itemvisivel=False 
         if gamestate=="creditos":
             tela.fill('blue')
+            textinho('Obrigado por jogar o NOSSO jogo!',1920//2,300,72)
+            textinho('Thiago\n Pedro\n Rafael\n',1920//2,1080//2,40)
 
             
         if gamestate=="configuração":
             tela.fill('yellow')
         pygame.display.update()
+   
+   
     if ativo:
             
           key = pygame.key.get_pressed()
           if key[pygame.K_LEFT]:
-            jogador.move((-4), 0)
+            jogador.move((-velocidade), 0)
           if key[pygame.K_RIGHT]:
-            jogador.move(4, 0)
+            jogador.move(velocidade, 0)
           if key[pygame.K_UP]:
-            jogador.move(0, -4)
+            jogador.move(0, -velocidade)
           if key[pygame.K_DOWN]:
-            jogador.move(0, 4)
+            jogador.move(0, velocidade)
     if gamestate=="nivel":
             tela.fill('black')
-            aviso="começou"
-
+            
             #exibe os blocos do nivel na tela
             for wall1 in walls:
                  pygame.draw.rect(tela, ("blue"), wall1.rect)
@@ -398,11 +431,21 @@ while rodar:
             jogador.draw(tela)
             inimigo.draw(tela)
             inimigo2.draw(tela)
+            inimigo3.draw(tela)
+              
+           
             ativo=True
             inimigo.Update()
             inimigo2.Update()# atualiza os movimentos do inimigo
+            inimigo3.Update()
             pygame.draw.rect(tela, ("red"), saida)
-            item(powerup, 700,700)
+            if not jogador.rect.colliderect(item.rect)and not velocidade==6:
+                   itemvisivel=True
+                   
+    if itemvisivel:
+        item.draw(tela)
+            
+            
     clock.tick(60)/1000         
     pygame.display.update()
 
